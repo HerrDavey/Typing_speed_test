@@ -25,7 +25,7 @@ frame.place(anchor="s", relx=.5, rely=.97)
 canvas = Canvas(root, height=450, width=1000, bg="lightblue", highlightthickness=0)
 canvas.place(anchor="n", relx=.5, rely=.02)
 
-user_entry = Entry(frame, width=40, font='Helvetica 25 bold', justify='center')
+user_entry = Entry(frame, width=40, font='Helvetica 25', justify='center')
 user_entry.place(anchor='center', rely=.2, relx=.5)
 
 time_var = StringVar()
@@ -55,10 +55,15 @@ label_wpm.place(anchor="s", rely=.75, relx=.77)
 
 class Typing_Speed_App:
 
-    def __init__(self, root):
+    def __init__(self, root, canvas):
         self.root = root
+        self.canvas = canvas
         self.typed_text = ""
         self.clicked = False
+        self.word_list = words.words()
+        self.filtered_word_list = [word for word in self.word_list if len(word) <= 6 and len(word) > 1]
+        self.phrase_generator()
+
 
         user_entry.bind('<Key>', self.start_count)
 
@@ -88,51 +93,19 @@ class Typing_Speed_App:
         wpm = (char_count / 5) / elapsed_time
         wpm_var.set(f"{wpm:.2f}")
 
+    def phrase_generator(self):
+        self.phrase = ""
+        for _ in range(10):
+            random_word = random.choice(self.filtered_word_list)
+            self.phrase += str(random_word).lower() + " "
+        self.phrase_list = self.phrase.strip().split()
+
+        # Display the generated phrase
+        self.canvas.create_text(500, 225, text=self.phrase, font=('Helvetica', 20))
+        print(self.phrase_list)
 
 if __name__ == "__main__":
-    app = Typing_Speed_App(root)
+    app = Typing_Speed_App(root, canvas)
     root.mainloop()
 
-#def delete_entry(event):
-# user_entry.delete(0, "end")
-#
-# # Dictionary settings
-# word_list = words.words()
-# filtered_word_list = [word for word in word_list if len(word) <= 6 and len(word) > 1]
-#
-# # Random Phrase generator
-# phrase = ""
-# for _ in range(10):
-#     random_word = random.choice(filtered_word_list)
-#     phrase += str(random_word).lower() + " "
-# phrase_list = phrase.strip().split()
-#
-# # Create individual words on canvas
-# word_ids = []
-# x, y = 65, 80
-# for word in phrase_list:
-#     word_id = canvas.create_text(x, y, text=word, font=('Helvetica 25 bold'), anchor="nw", fill="black")
-#     word_ids.append(word_id)
-#     x += canvas.bbox(word_id)[2] - canvas.bbox(word_id)[0] + 10  # Move x by the width of the word + a space
-#     if x > 850:  # Move to next line
-#         x = 65
-#         y += 40
-#
-#
-# def process(event=None):
-#     content = user_entry.get().strip().split()
-#     for idx, word in enumerate(content):
-#         if idx < len(phrase_list):
-#             if word == phrase_list[idx]:
-#                 canvas.itemconfig(word_ids[idx], fill="green")
-#             else:
-#                 canvas.itemconfig(word_ids[idx], fill="red")
-#
-#     for idx in range(len(content), len(phrase_list)):
-#         canvas.itemconfig(word_ids[idx], fill="black")
-#
-#
 
-#
-#
-# user_entry.bind('<space>', process)
