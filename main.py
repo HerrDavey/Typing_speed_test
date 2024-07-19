@@ -63,6 +63,8 @@ class Typing_Speed_App:
         self.word_list = words.words()
         self.filtered_word_list = [word for word in self.word_list if len(word) <= 6 and len(word) > 1]
         self.phrase_generator()
+        self.start_time = None
+        self.time_capacity = 10
 
 
         user_entry.bind('<Key>', self.start_count)
@@ -70,7 +72,8 @@ class Typing_Speed_App:
     def start_count(self, event):
         if not self.clicked:
             self.clicked = True
-            self.countdown(int(10))
+            self.start_time=time.time()
+            self.countdown(int(self.time_capacity - 1))
             event.widget.unbind('<Key>')
 
     def countdown(self, timer):
@@ -86,12 +89,17 @@ class Typing_Speed_App:
 
     def update_metrics(self):
         self.typed_text = str(user_entry.get())
-        elapsed_time = 10
+        elapsed_time = time.time() - self.start_time
         char_count = len(self.typed_text)
         cpm = char_count / elapsed_time
         cpm_var.set(f"{cpm:.2f}")
         wpm = (char_count / 5) / elapsed_time
         wpm_var.set(f"{wpm:.2f}")
+
+        print(self.start_time)
+        print(time.time())
+        print(f"Ex: {elapsed_time}")
+
 
     def phrase_generator(self):
         self.phrase = ""
