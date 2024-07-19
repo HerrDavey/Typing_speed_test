@@ -4,11 +4,9 @@ import nltk
 from nltk.corpus import words
 from tkinter import *
 
-
-# Download dictonary (only once)
+# Download dictionary (only once)
 def download_dictionary():
     nltk.download('words')
-
 
 # Window Settings
 root = Tk()
@@ -65,14 +63,16 @@ class Typing_Speed_App:
         self.phrase_generator()
         self.start_time = None
         self.time_capacity = 10
-
+        self.phrase_list = []
+        self.user_words = []
 
         user_entry.bind('<Key>', self.start_count)
+
 
     def start_count(self, event):
         if not self.clicked:
             self.clicked = True
-            self.start_time=time.time()
+            self.start_time = time.time()
             self.countdown(int(self.time_capacity - 1))
             event.widget.unbind('<Key>')
 
@@ -81,14 +81,18 @@ class Typing_Speed_App:
             mins, secs = divmod(timer, 60)
             formatted_time = '{:02d}:{:02d}'.format(mins, secs)
             time_var.set(formatted_time)
+            user_entry.bind("<space>", self.add_user_word)
+            user_entry.bind("<BackSpace>", self.show_last_word)
             root.after(1000, self.countdown, timer - 1)
         else:
             time_var.set("Time's up!")
+            user_entry.delete(0, 'end')
             user_entry.config(state="disabled")
             self.update_metrics()
 
     def update_metrics(self):
-        self.typed_text = str(user_entry.get())
+        for word in self.user_words:
+            self.typed_text += str(word)
         elapsed_time = time.time() - self.start_time
         char_count = len(self.typed_text)
         cpm = char_count / elapsed_time
@@ -99,21 +103,32 @@ class Typing_Speed_App:
         print(self.start_time)
         print(time.time())
         print(f"Ex: {elapsed_time}")
-
+        print(self.phrase_list)
+        print(self.user_words)
 
     def phrase_generator(self):
         self.phrase = ""
         for _ in range(10):
             random_word = random.choice(self.filtered_word_list)
             self.phrase += str(random_word).lower() + " "
-        self.phrase_list = self.phrase.strip().split()
-
+            self.phrase_list = self.phrase.strip().split()
         # Display the generated phrase
         self.canvas.create_text(500, 225, text=self.phrase, font=('Helvetica', 20))
-        print(self.phrase_list)
+
+    def add_user_word(self, event):
+        if user_entry.get() != " " and user_entry.get() != "":
+            self.user_words.append(user_entry.get().replace(" ",""))
+            user_entry.delete(0, 'end')
+        else:
+            user_entry.delete(0, 'end')
+
+    def show_last_word(self, event):
+        if user_entry.get() == " ":
+            text = self.user_words[-1]
+            user_entry.insert(0, text)
+            self.user_words.pop()
+            print(text)
 
 if __name__ == "__main__":
     app = Typing_Speed_App(root, canvas)
     root.mainloop()
-
-
