@@ -53,48 +53,48 @@ label_wpm = Label(frame, font='Helvetica 10 bold', bg="lightblue", text="WPM")
 label_wpm.place(anchor="s", rely=.75, relx=.77)
 
 
-def start_count(event):
-    if not hasattr(start_count, 'clicked'):
-        start_count.clicked = True
-        countdown(int(10))
-        event.widget.unbind('<Key>')
+class Typing_Speed_App:
+
+    def __init__(self, root):
+        self.root = root
+        self.typed_text = ""
+        self.clicked = False
+
+        user_entry.bind('<Key>', self.start_count)
+
+    def start_count(self, event):
+        if not self.clicked:
+            self.clicked = True
+            self.countdown(int(10))
+            event.widget.unbind('<Key>')
+
+    def countdown(self, timer):
+        if timer >= 0:
+            mins, secs = divmod(timer, 60)
+            formatted_time = '{:02d}:{:02d}'.format(mins, secs)
+            time_var.set(formatted_time)
+            root.after(1000, self.countdown, timer - 1)
+        else:
+            time_var.set("Time's up!")
+            user_entry.config(state="disabled")
+            self.update_metrics()
+
+    def update_metrics(self):
+        self.typed_text = str(user_entry.get())
+        elapsed_time = 10
+        char_count = len(self.typed_text)
+        cpm = char_count / elapsed_time
+        cpm_var.set(f"{cpm:.2f}")
+        wpm = (char_count / 5) / elapsed_time
+        wpm_var.set(f"{wpm:.2f}")
 
 
-def countdown(timer):
-    if timer >= 0:
-        mins, secs = divmod(timer, 60)
-        formatted_time = '{:02d}:{:02d}'.format(mins, secs)
-        time_var.set(formatted_time)
-        root.after(1000, countdown, timer - 1)
-    else:
-        time_var.set("Time's up!")
-        user_entry.config(state="disabled")
-        update_metrics()
+if __name__ == "__main__":
+    app = Typing_Speed_App(root)
+    root.mainloop()
 
-
-def update_metrics():
-    start_time = time.time()
-    typed_text = ""
-    typed_text += str(user_entry.get())
-    elapsed_time = 10
-    char_count = len(typed_text)
-    cpm = char_count / elapsed_time
-    wpm = (char_count / 5) / elapsed_time
-    cpm_var.set(f"{cpm:.2f}")
-    wpm_var.set(f"{wpm:.2f}")
-
-
-def delete_entry(event):
-    user_entry.delete(0, "end")
-
-
-# Start function
-user_entry.bind('<Key>', start_count)
-root.mainloop()
-
-#
-
-#
+#def delete_entry(event):
+# user_entry.delete(0, "end")
 #
 # # Dictionary settings
 # word_list = words.words()
