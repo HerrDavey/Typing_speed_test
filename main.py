@@ -58,6 +58,7 @@ class TypingSpeedApp:
     def __init__(self, root, canvas):
         self.root = root
         self.canvas = canvas
+        self.current_index = -1
         self.canvas_text = None
         self.typed_text = ""
         self.phrase_list = []
@@ -68,6 +69,7 @@ class TypingSpeedApp:
         self.start_time = None
         self.time_capacity = 10
         self.user_words = []
+
 
         user_entry.bind('<Key>', self.start_count)
 
@@ -119,12 +121,12 @@ class TypingSpeedApp:
         return canvas_text
 
     def add_user_word(self, event):
+        print(self.current_index)
+        self.current_index += 1
         if user_entry.get().strip() != "":
             word = user_entry.get().strip()
             self.user_words.append(word)
-            # TODO 1: Repair the problem with same words correct f.e. double "word" is correct in order
-            #  ["word", "another"] - it should be correct only when typing word and next another
-            if word in self.phrase_list:
+            if word in self.phrase_list[self.current_index]:
                 self.canvas.config(bg="lightgreen")
             else:
                 self.canvas.config(bg='lightcoral')
@@ -132,6 +134,7 @@ class TypingSpeedApp:
 
     def show_last_word(self, event):
         if user_entry.get() == " ":
+            self.current_index -= 1
             text = self.user_words[-1]
             user_entry.insert(0, text)
             self.user_words.pop()
