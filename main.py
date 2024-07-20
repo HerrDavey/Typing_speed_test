@@ -67,7 +67,7 @@ class TypingSpeedApp:
         self.filtered_word_list = [word for word in self.word_list if len(word) <= 6 and len(word) > 1]
         self.phrase_generator()
         self.start_time = None
-        self.time_capacity = 10
+        self.time_capacity = 30
         self.user_words = []
 
 
@@ -117,12 +117,13 @@ class TypingSpeedApp:
             self.phrase += str(random_word).lower() + " "
             self.phrase_list.append(str(random_word).lower())
         # Display the generated phrase
-        canvas_text = self.canvas.create_text(500, 225, text=self.phrase, font=('Helvetica', 20))
+        canvas_text = self.canvas.create_text(500, 225, text=self.phrase, font=('Helvetica', 20), tag="canvas_txt")
         return canvas_text
 
     def add_user_word(self, event):
-        print(self.current_index)
         self.current_index += 1
+
+        print(self.current_index)
         if user_entry.get().strip() != "":
             word = user_entry.get().strip()
             self.user_words.append(word)
@@ -131,6 +132,14 @@ class TypingSpeedApp:
             else:
                 self.canvas.config(bg='lightcoral')
             user_entry.delete(0, 'end')
+
+            if self.current_index == 9:
+                self.current_index = -1
+                canvas.delete("canvas_txt")
+                self.canvas.config(bg='lightblue')
+                self.phrase_list.clear()
+                self.user_words.clear()
+                self.phrase_generator()
 
     def show_last_word(self, event):
         if user_entry.get() == " ":
@@ -146,8 +155,9 @@ if __name__ == "__main__":
     root.mainloop()
 
 
-# TODO 2: If there is all words inside then canvas should have update of phrase
 # TODO 3: Underline current word to write inside Entry
 # TODO 4: Add restart button to program
 # TODO 5: Better phrase generate (easier to write) - another dictionary?
 # TODO 6: Adjustment the program design
+# TODO 7: If I type only one letter (like "e") there is possibility to achieve green background - bug!
+# TODO 8: After 3 words there should be updating WPM and CMP
