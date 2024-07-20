@@ -122,10 +122,12 @@ class TypingSpeedApp:
         if user_entry.get().strip() != "":
             word = user_entry.get().strip()
             self.user_words.append(word)
+            # TODO 1: Repair the problem with same words correct f.e. double "word" is correct in order
+            #  ["word", "another"] - it should be correct only when typing word and next another
             if word in self.phrase_list:
-                self.canvas.config(bg="red")
+                self.canvas.config(bg="lightgreen")
             else:
-                self.canvas.config(bg='blue')
+                self.canvas.config(bg='lightcoral')
             user_entry.delete(0, 'end')
 
     def show_last_word(self, event):
@@ -139,3 +141,10 @@ class TypingSpeedApp:
 if __name__ == "__main__":
     app = TypingSpeedApp(root, canvas)
     root.mainloop()
+
+
+# TODO 2: If there is all words inside then canvas should have update of phrase
+# TODO 3: Underline current word to write inside Entry
+# TODO 4: Add restart button to program
+# TODO 5: Better phrase generate (easier to write) - another dictionary?
+# TODO 6: Adjustment the program design
