@@ -52,6 +52,10 @@ label_cpm.place(anchor="s", rely=.75, relx=.5)
 label_wpm = Label(frame, font='Helvetica 10 bold', bg="lightblue", text="WPM")
 label_wpm.place(anchor="s", rely=.75, relx=.77)
 
+text_widget = Text(canvas, font='Helvetica 20 bold', bg="lightblue", wrap='word', height=5, width=50, highlightthickness=0, borderwidth=0)
+text_widget.place(anchor="center", relx=.5, rely=.5)
+text_widget.config(state=DISABLED)
+
 
 class TypingSpeedApp:
 
@@ -59,6 +63,7 @@ class TypingSpeedApp:
         self.root = root
         self.canvas = canvas
         self.current_index = -1
+        self.highlight_index = 0
         self.canvas_text = None
         self.typed_text = ""
         self.phrase_list = []
@@ -116,9 +121,14 @@ class TypingSpeedApp:
             random_word = random.choice(self.filtered_word_list)
             self.phrase += str(random_word).lower() + " "
             self.phrase_list.append(str(random_word).lower())
-        # Display the generated phrase
-        canvas_text = self.canvas.create_text(500, 225, text=self.phrase, font=('Helvetica', 20), tag="canvas_txt")
-        return canvas_text
+        self.display_phrase()
+        self.highlight_next_word()
+
+    def display_phrase(self):
+        text_widget.config(state=NORMAL)
+        text_widget.delete("1.0", END)
+        text_widget.insert(END, self.phrase)
+        text_widget.config(state=DISABLED)
 
     def add_user_word(self, event):
         self.current_index += 1
@@ -135,19 +145,50 @@ class TypingSpeedApp:
 
             if self.current_index == 9:
                 self.current_index = -1
+                self.highlight_index = 0
                 canvas.delete("canvas_txt")
                 self.canvas.config(bg='lightblue')
                 self.phrase_list.clear()
                 self.user_words.clear()
                 self.phrase_generator()
+            else:
+                self.highlight_next_word()
 
     def show_last_word(self, event):
         if user_entry.get() == " ":
             self.current_index -= 1
+            self.highlight_index -= 1
+            self.highlight_previous_word()
             text = self.user_words[-1]
             user_entry.insert(0, text)
             self.user_words.pop()
+            self.highlight_next_word()
             print(text)
+
+    def highlight_next_word(self):
+        text_widget.tag_remove("highlight", "1.0", "end")
+
+        words = self.phrase.strip().split()
+        start_idx = sum(len(words[i]) + 1 for i in range(self.highlight_index))
+        end_idx = start_idx + len(words[self.highlight_index])
+
+        text_widget.config(state=NORMAL)
+        text_widget.tag_add("highlight", f"1.{start_idx}", f"1.{end_idx}")
+        text_widget.tag_config("highlight", background="yellow")
+        text_widget.config(state=DISABLED)
+        self.highlight_index += 1
+
+    def highlight_previous_word(self):
+        self.highlight_index -= 1
+        text_widget.tag_remove("highlight", "1.0", "end")
+        words = self.phrase.strip().split()
+        start_idx = sum(len(words[i]) + 1 for i in range(self.highlight_index))
+        end_idx = start_idx + len(words[self.highlight_index])
+        text_widget.config(state=NORMAL)
+        text_widget.tag_add("highlight", f"1.{start_idx}", f"1.{end_idx}")
+        text_widget.tag_config("highlight", background="yellow")
+        text_widget.config(state=DISABLED)
+
 
 
 if __name__ == "__main__":
@@ -155,9 +196,11 @@ if __name__ == "__main__":
     root.mainloop()
 
 
-# TODO 3: Underline current word to write inside Entry
+# TODO 3: Underline current word to write
 # TODO 4: Add restart button to program
 # TODO 5: Better phrase generate (easier to write) - another dictionary?
 # TODO 6: Adjustment the program design
 # TODO 7: If I type only one letter (like "e") there is possibility to achieve green background - bug!
 # TODO 8: After 3 words there should be updating WPM and CMP
+# TODO 9: Update the method of counting WPM and CMP to correct
+# TODO 10: Score board and plot (graph?) after typing
