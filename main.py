@@ -52,10 +52,13 @@ label_cpm.place(anchor="s", rely=.75, relx=.5)
 label_wpm = Label(frame, font='Helvetica 10 bold', bg="lightblue", text="WPM")
 label_wpm.place(anchor="s", rely=.75, relx=.77)
 
-text_widget = Text(canvas, font='Helvetica 20 bold', bg="lightblue", wrap='word', height=5, width=50, highlightthickness=0, borderwidth=0)
-text_widget.place(anchor="center", relx=.5, rely=.5)
+text_widget = Text(canvas, font='Helvetica 20 bold', bg="lightblue", wrap='word', height=5, width=50,
+                   highlightthickness=0, borderwidth=0)
+text_widget.place(anchor="center", relx=.51, rely=.6)
 text_widget.config(state=DISABLED)
 
+restart_btn = Button(frame, text="Try again", highlightthickness=0, bd=0, bg="yellow", font='Helvetica 13 bold', fg="red")
+restart_btn.place(anchor="s", rely=.6, relx=.93)
 
 class TypingSpeedApp:
 
@@ -74,7 +77,6 @@ class TypingSpeedApp:
         self.start_time = None
         self.time_capacity = 30
         self.user_words = []
-
 
         user_entry.bind('<Key>', self.start_count)
 
@@ -139,8 +141,10 @@ class TypingSpeedApp:
             self.user_words.append(word)
             if word in self.phrase_list[self.current_index]:
                 self.canvas.config(bg="lightgreen")
+                text_widget.config(bg='lightgreen')
             else:
                 self.canvas.config(bg='lightcoral')
+                text_widget.config(bg='lightcoral')
             user_entry.delete(0, 'end')
 
             if self.current_index == 9:
@@ -148,6 +152,7 @@ class TypingSpeedApp:
                 self.highlight_index = 0
                 canvas.delete("canvas_txt")
                 self.canvas.config(bg='lightblue')
+                text_widget.config(bg='lightblue')
                 self.phrase_list.clear()
                 self.user_words.clear()
                 self.phrase_generator()
@@ -190,13 +195,10 @@ class TypingSpeedApp:
         text_widget.config(state=DISABLED)
 
 
-
 if __name__ == "__main__":
     app = TypingSpeedApp(root, canvas)
     root.mainloop()
 
-
-# TODO 3: Underline current word to write
 # TODO 4: Add restart button to program
 # TODO 5: Better phrase generate (easier to write) - another dictionary?
 # TODO 6: Adjustment the program design
@@ -204,3 +206,4 @@ if __name__ == "__main__":
 # TODO 8: After 3 words there should be updating WPM and CMP
 # TODO 9: Update the method of counting WPM and CMP to correct
 # TODO 10: Score board and plot (graph?) after typing
+# TODO 11: Delete hard-code values
