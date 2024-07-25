@@ -57,7 +57,7 @@ text_widget = Text(canvas, font='Helvetica 20 bold', bg="lightblue", wrap='word'
 text_widget.place(anchor="center", relx=.51, rely=.6)
 text_widget.config(state=DISABLED)
 
-restart_btn = Button(frame, text="Try again", highlightthickness=0, bd=0, bg="yellow", font='Helvetica 13 bold', fg="red")
+restart_btn = Button(frame, text="Try again", highlightthickness=0, bd=2, bg="orange", font='Helvetica 13 bold', fg="purple")
 restart_btn.place(anchor="s", rely=.6, relx=.93)
 
 class TypingSpeedApp:
@@ -77,8 +77,10 @@ class TypingSpeedApp:
         self.start_time = None
         self.time_capacity = 30
         self.user_words = []
+        self.timer_id = None
 
         user_entry.bind('<Key>', self.start_count)
+        restart_btn.config(command=self.restart)
 
     def start_count(self, event):
         if not self.clicked:
@@ -94,7 +96,7 @@ class TypingSpeedApp:
             time_var.set(formatted_time)
             user_entry.bind("<space>", self.add_user_word)
             user_entry.bind("<BackSpace>", self.show_last_word)
-            root.after(1000, self.countdown, timer - 1)
+            self.timer_id = root.after(1000, self.countdown, timer - 1)
         else:
             time_var.set("Time's up!")
             user_entry.delete(0, 'end')
@@ -194,12 +196,31 @@ class TypingSpeedApp:
         text_widget.tag_config("highlight", background="yellow")
         text_widget.config(state=DISABLED)
 
+    def restart(self):
+        if self.timer_id:
+            root.after_cancel(self.timer_id)
+        self.clicked = False
+        self.current_index = -1
+        self.highlight_index = 0
+        self.canvas_text = None
+        self.typed_text = ""
+        self.phrase_list.clear()
+        self.user_words.clear()
+        user_entry.config(state=NORMAL)
+        user_entry.delete(0, 'end')
+        time_var.set("1:00")
+        cpm_var.set("?")
+        wpm_var.set("?")
+        self.phrase_generator()
+        user_entry.bind('<Key>', self.start_count)
+        self.canvas.config(bg='lightblue')
+        text_widget.config(bg='lightblue')
 
 if __name__ == "__main__":
     app = TypingSpeedApp(root, canvas)
     root.mainloop()
 
-# TODO 4: Add restart button to program
+
 # TODO 5: Better phrase generate (easier to write) - another dictionary?
 # TODO 6: Adjustment the program design
 # TODO 7: If I type only one letter (like "e") there is possibility to achieve green background - bug!
