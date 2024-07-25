@@ -9,7 +9,6 @@ from tkinter import *
 def download_dictionary():
     nltk.download('words')
 
-
 # Window Settings
 root = Tk()
 root.geometry("1080x700")
@@ -72,7 +71,7 @@ class TypingSpeedApp:
         self.phrase_list = []
         self.clicked = False
         self.word_list = words.words()
-        self.filtered_word_list = [word for word in self.word_list if len(word) <= 6 and len(word) > 1]
+        self.filtered_word_list = [word for word in self.word_list if len(word) <= 6 and len(word) > 1][-666:]
         self.phrase_generator()
         self.start_time = None
         self.time_capacity = 30
@@ -171,6 +170,7 @@ class TypingSpeedApp:
             self.user_words.pop()
             self.highlight_next_word()
             print(text)
+            print(self.filtered_word_list)
 
     def highlight_next_word(self):
         text_widget.tag_remove("highlight", "1.0", "end")
@@ -220,11 +220,10 @@ if __name__ == "__main__":
     app = TypingSpeedApp(root, canvas)
     root.mainloop()
 
-
-# TODO 5: Better phrase generate (easier to write) - another dictionary?
 # TODO 6: Adjustment the program design
 # TODO 7: If I type only one letter (like "e") there is possibility to achieve green background - bug!
 # TODO 8: After 3 words there should be updating WPM and CMP
 # TODO 9: Update the method of counting WPM and CMP to correct
 # TODO 10: Score board and plot (graph?) after typing
 # TODO 11: Delete hard-code values
+# TODO 12: Inspect that dictionary is downloaded by user (if not download it)
