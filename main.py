@@ -76,7 +76,7 @@ class TypingSpeedApp:
         self.filtered_word_list = [word for word in self.word_list if len(word) <= 6 and len(word) > 1][-666:]
         self.phrase_generator()
         self.start_time = None
-        self.time_capacity = 60
+        self.time_capacity = 10
         self.user_words = []
         self.user_words_history = []
         self.timer_id = None
@@ -104,6 +104,7 @@ class TypingSpeedApp:
             user_entry.delete(0, 'end')
             user_entry.config(state="disabled")
             self.update_metrics()
+            self.scoreboard_save()
 
     def update_metrics(self):
         elapsed_time = time.time() - self.start_time
@@ -114,10 +115,6 @@ class TypingSpeedApp:
 
         cpm_var.set(f"{raw_cpm:.2f}")
         wpm_var.set(f"{wpm:.2f}")
-        print(self.phrase_list_history)
-        print(self.phrase_list)
-        print(self.user_words_history)
-        print(self.user_words)
 
 
     def phrase_generator(self):
@@ -225,6 +222,18 @@ class TypingSpeedApp:
         self.canvas.config(bg=COLORS[2])
         text_widget.config(bg=COLORS[2])
 
+    def scoreboard_save(self):
+        pass
+        # new_score = float(cpm_var.get())
+        # with open('scoreboard.txt', 'r+') as file:
+        #     file.write()
+        #     max_value = file.readlines()
+        #     print(max_value)
+
+
+
+
+
 if __name__ == "__main__":
     app = TypingSpeedApp(root, canvas)
     root.mainloop()
@@ -235,4 +244,4 @@ if __name__ == "__main__":
 # TODO 13: Multiple press "space" giving error in index counting during letters typing - bug!
 # TODO 14: On first page there is no counting WPM and CMP correct (it's giving 0 values) - on the other hand if we type
 #  fast and achieve second page then we have our result
-# TODO 15: After new page i cannot back to previous page if i press backspace - bug!
+# TODO 15: After new page I cannot back to previous page if I press backspace - bug!
