@@ -70,13 +70,15 @@ class TypingSpeedApp:
         self.canvas_text = None
         self.typed_text = ""
         self.phrase_list = []
+        self.phrase_list_history = []
         self.clicked = False
         self.word_list = words.words()
         self.filtered_word_list = [word for word in self.word_list if len(word) <= 6 and len(word) > 1][-666:]
         self.phrase_generator()
         self.start_time = None
-        self.time_capacity = 30
+        self.time_capacity = 60
         self.user_words = []
+        self.user_words_history = []
         self.timer_id = None
 
         user_entry.bind('<Key>', self.start_count)
@@ -104,14 +106,18 @@ class TypingSpeedApp:
             self.update_metrics()
 
     def update_metrics(self):
-        for word in self.user_words:
-            self.typed_text += str(word)
         elapsed_time = time.time() - self.start_time
-        char_count = len(self.typed_text)
-        cpm = (char_count / elapsed_time) * 60
-        cpm_var.set(f"{cpm:.2f}")
-        wpm = ((char_count / 5) / elapsed_time) * 60
+        raw_cpm = (len(self.typed_text) / elapsed_time) * 60
+        corrected_text = ' '.join([word for word, correct in zip(self.user_words_history, self.phrase_list_history) if word == correct])
+        corrected_cpm = (len(corrected_text) / elapsed_time) * 60
+        wpm = corrected_cpm / 5
+
+        cpm_var.set(f"{raw_cpm:.2f}")
         wpm_var.set(f"{wpm:.2f}")
+        print(self.phrase_list_history)
+        print(self.phrase_list)
+        print(self.user_words_history)
+        print(self.user_words)
 
 
     def phrase_generator(self):
@@ -120,6 +126,7 @@ class TypingSpeedApp:
             random_word = random.choice(self.filtered_word_list)
             self.phrase += str(random_word).lower() + " "
             self.phrase_list.append(str(random_word).lower())
+            self.phrase_list_history.append(str(random_word).lower())
         self.display_phrase()
         self.highlight_next_word()
 
@@ -135,6 +142,8 @@ class TypingSpeedApp:
         if user_entry.get().strip() != "":
             word = user_entry.get().strip()
             self.user_words.append(word)
+            self.user_words_history.append(word)
+            self.typed_text += word + " "
             if word == self.phrase_list[self.current_index]:
                 self.canvas.config(bg="lightgreen")
                 text_widget.config(bg='lightgreen')
@@ -155,6 +164,10 @@ class TypingSpeedApp:
             else:
                 self.highlight_next_word()
 
+            if len(self.user_words) > 2:
+                self.update_metrics()
+
+
     def show_last_word(self, event):
         if user_entry.get() == " ":
             self.current_index -= 1
@@ -163,6 +176,7 @@ class TypingSpeedApp:
             text = self.user_words[-1]
             user_entry.insert(0, text)
             self.user_words.pop()
+            self.user_words_history.pop()
             self.highlight_next_word()
 
     def highlight_next_word(self):
@@ -198,7 +212,9 @@ class TypingSpeedApp:
         self.canvas_text = None
         self.typed_text = ""
         self.phrase_list.clear()
+        self.phrase_list_history.clear()
         self.user_words.clear()
+        self.user_words_history.clear()
         user_entry.config(state=NORMAL)
         user_entry.delete(0, 'end')
         time_var.set("1:00")
@@ -213,11 +229,10 @@ if __name__ == "__main__":
     app = TypingSpeedApp(root, canvas)
     root.mainloop()
 
-# TODO 8: After 3 words there should be updating WPM and CMP
-# TODO 9: Update the method of counting WPM and CMP to correct
 # TODO 10: Score board and plot (graph?) after typing
 # TODO 11: Delete hard-code values
 # TODO 12: Inspect that dictionary is downloaded by user (if not download it)
 # TODO 13: Multiple press "space" giving error in index counting during letters typing - bug!
 # TODO 14: On first page there is no counting WPM and CMP correct (it's giving 0 values) - on the other hand if we type
 #  fast and achieve second page then we have our result
+# TODO 15: After new page i cannot back to previous page if i press backspace - bug!
