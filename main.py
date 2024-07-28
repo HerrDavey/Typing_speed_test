@@ -1,6 +1,7 @@
 import random
 import time
 import nltk
+import json
 from nltk.corpus import words
 from tkinter import *
 
@@ -223,15 +224,35 @@ class TypingSpeedApp:
         text_widget.config(bg=COLORS[2])
 
     def scoreboard_save(self):
-        pass
-        # new_score = float(cpm_var.get())
-        # with open('scoreboard.txt', 'r+') as file:
-        #     file.write()
-        #     max_value = file.readlines()
-        #     print(max_value)
+        new_score_cpm = float(cpm_var.get())
+        new_score_wpm = float(wpm_var.get())
 
+        try:
+            with open('scoreboard.json', 'r+') as file:
+                last_score = json.load(file)
+                last_wpm = float(last_score["WPM"])
+                last_cpm = float(last_score["CPM"])
 
+                if new_score_cpm > last_cpm:
+                    last_score["CPM"] = new_score_cpm
 
+                if new_score_wpm > last_wpm:
+                    last_score["WPM"] = new_score_wpm
+
+                if new_score_cpm > last_cpm or new_score_wpm > last_wpm:
+                    file.seek(0)
+                    file.truncate(0)
+                    json.dump(last_score, file)
+
+        except FileNotFoundError:
+            with open('scoreboard.json', 'a') as file:
+                max_value_cpm = cpm_var.get()
+                max_value_wpm = wpm_var.get()
+                score = {
+                    "WPM": float(max_value_wpm),
+                    "CPM": float(max_value_cpm)
+                }
+                json.dump(score, file)
 
 
 if __name__ == "__main__":
