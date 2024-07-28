@@ -1,29 +1,36 @@
 import random
 import time
+import tkinter.messagebox
+
 import nltk
 import json
 from nltk.corpus import words
+from nltk.data import find
 from tkinter import *
 
-COLORS = ['#143F6B', '#F55353', '#FEB139', '#F6F54D']
 
 # Download dictionary (only once)
 def download_dictionary():
-    nltk.download('words')
+    try:
+        find('corpora/words.zip')
+    except LookupError:
+        tkinter.messagebox.showinfo("Downloading...", 'Downloading dictionary please wait')
+        nltk.download('words')
+        tkinter.messagebox.showinfo("Download successful", "Download successful")
 
 # Window Settings
 root = Tk()
 root.geometry("1080x700")
 root.maxsize(1080, 700)
 root.title("Writing Speed Test App")
-root.config(bg=COLORS[0])
+root.config(bg='#143F6B')
 root.resizable(False, False)
 
 # Elements in window
-frame = Frame(root, height=200, width=1000, bg=COLORS[1])
+frame = Frame(root, height=200, width=1000, bg="#F55353")
 frame.place(anchor="s", relx=.5, rely=.97)
 
-canvas = Canvas(root, height=450, width=1000, bg=COLORS[2], highlightthickness=0)
+canvas = Canvas(root, height=450, width=1000, bg="#FEB139", highlightthickness=0)
 canvas.place(anchor="n", relx=.5, rely=.02)
 
 user_entry = Entry(frame, width=40, font='Helvetica 25', justify='center')
@@ -53,7 +60,7 @@ label_cpm.place(anchor="s", rely=.75, relx=.5)
 label_wpm = Label(frame, font='Helvetica 10 bold', bg="lightblue", text="WPM")
 label_wpm.place(anchor="s", rely=.75, relx=.77)
 
-text_widget = Text(canvas, font='Helvetica 20 bold', bg=COLORS[2], wrap='word', height=5, width=50,
+text_widget = Text(canvas, font='Helvetica 20 bold', bg='#FEB139', wrap='word', height=5, width=50,
                    highlightthickness=0, borderwidth=0)
 text_widget.place(anchor="center", relx=.51, rely=.6)
 text_widget.config(state=DISABLED)
@@ -77,7 +84,7 @@ class TypingSpeedApp:
         self.filtered_word_list = [word for word in self.word_list if len(word) <= 6 and len(word) > 1][-666:]
         self.phrase_generator()
         self.start_time = None
-        self.time_capacity = 10
+        self.time_capacity = 60
         self.user_words = []
         self.user_words_history = []
         self.timer_id = None
@@ -97,6 +104,7 @@ class TypingSpeedApp:
             mins, secs = divmod(timer, 60)
             formatted_time = '{:02d}:{:02d}'.format(mins, secs)
             time_var.set(formatted_time)
+
             user_entry.bind("<space>", self.add_user_word)
             user_entry.bind("<BackSpace>", self.show_last_word)
             self.timer_id = root.after(1000, self.countdown, timer - 1)
@@ -106,6 +114,7 @@ class TypingSpeedApp:
             user_entry.config(state="disabled")
             self.update_metrics()
             self.scoreboard_save()
+
 
     def update_metrics(self):
         elapsed_time = time.time() - self.start_time
@@ -135,14 +144,13 @@ class TypingSpeedApp:
         text_widget.config(state=DISABLED)
 
     def add_user_word(self, event):
-        self.current_index += 1
-
-        if user_entry.get().strip() != "":
-            word = user_entry.get().strip()
-            self.user_words.append(word)
-            self.user_words_history.append(word)
-            self.typed_text += word + " "
-            if word == self.phrase_list[self.current_index]:
+        typed_word = user_entry.get().strip()
+        if typed_word:
+            self.current_index += 1
+            self.user_words.append(typed_word)
+            self.user_words_history.append(typed_word)
+            self.typed_text += typed_word + " "
+            if typed_word == self.phrase_list[self.current_index]:
                 self.canvas.config(bg="lightgreen")
                 text_widget.config(bg='lightgreen')
             else:
@@ -154,8 +162,8 @@ class TypingSpeedApp:
                 self.current_index = -1
                 self.highlight_index = 0
                 canvas.delete("canvas_txt")
-                self.canvas.config(bg=COLORS[2])
-                text_widget.config(bg=COLORS[2])
+                self.canvas.config(bg='#FEB139')
+                text_widget.config(bg='#FEB139')
                 self.phrase_list.clear()
                 self.user_words.clear()
                 self.phrase_generator()
@@ -164,6 +172,8 @@ class TypingSpeedApp:
 
             if len(self.user_words) > 2:
                 self.update_metrics()
+        else:
+            user_entry.delete(0, 'end')
 
 
     def show_last_word(self, event):
@@ -186,7 +196,7 @@ class TypingSpeedApp:
 
         text_widget.config(state=NORMAL)
         text_widget.tag_add("highlight", f"1.{start_idx}", f"1.{end_idx}")
-        text_widget.tag_config("highlight", background=COLORS[3])
+        text_widget.tag_config("highlight", background='#F6F54D')
         text_widget.config(state=DISABLED)
         self.highlight_index += 1
 
@@ -220,8 +230,8 @@ class TypingSpeedApp:
         wpm_var.set("?")
         self.phrase_generator()
         user_entry.bind('<Key>', self.start_count)
-        self.canvas.config(bg=COLORS[2])
-        text_widget.config(bg=COLORS[2])
+        self.canvas.config(bg='#FEB139')
+        text_widget.config(bg='#FEB139')
 
     def scoreboard_save(self):
         new_score_cpm = float(cpm_var.get())
@@ -256,13 +266,8 @@ class TypingSpeedApp:
 
 
 if __name__ == "__main__":
+    download_dictionary()
     app = TypingSpeedApp(root, canvas)
     root.mainloop()
 
-# TODO 10: Score board and plot (graph?) after typing
-# TODO 11: Delete hard-code values
-# TODO 12: Inspect that dictionary is downloaded by user (if not download it)
-# TODO 13: Multiple press "space" giving error in index counting during letters typing - bug!
-# TODO 14: On first page there is no counting WPM and CMP correct (it's giving 0 values) - on the other hand if we type
-#  fast and achieve second page then we have our result
-# TODO 15: After new page I cannot back to previous page if I press backspace - bug!
+# TODO 10: Scoreboard and plot (graph?) after typing
