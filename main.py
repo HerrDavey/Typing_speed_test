@@ -18,6 +18,7 @@ def download_dictionary():
         nltk.download('words')
         tkinter.messagebox.showinfo("Download successful", "Download successful")
 
+
 # Window Settings
 root = Tk()
 root.geometry("1080x700")
@@ -65,8 +66,10 @@ text_widget = Text(canvas, font='Helvetica 20 bold', bg='#FEB139', wrap='word', 
 text_widget.place(anchor="center", relx=.51, rely=.6)
 text_widget.config(state=DISABLED)
 
-restart_btn = Button(frame, text="Try again", highlightthickness=0, bd=2, bg="#000000", font='Helvetica 13 bold', fg="#EEEEEE")
+restart_btn = Button(frame, text="Try again", highlightthickness=0, bd=2, bg="#000000", font='Helvetica 13 bold',
+                     fg="#EEEEEE")
 restart_btn.place(anchor="s", rely=.6, relx=.93)
+
 
 class TypingSpeedApp:
 
@@ -81,7 +84,7 @@ class TypingSpeedApp:
         self.phrase_list_history = []
         self.clicked = False
         self.word_list = words.words()
-        self.filtered_word_list = [word for word in self.word_list if len(word) <= 6 and len(word) > 1][-666:]
+        self.filtered_word_list = [word for word in self.word_list if 6 >= len(word) > 1][-666:]
         self.phrase_generator()
         self.start_time = None
         self.time_capacity = 60
@@ -115,17 +118,16 @@ class TypingSpeedApp:
             self.update_metrics()
             self.scoreboard_save()
 
-
     def update_metrics(self):
         elapsed_time = time.time() - self.start_time
         raw_cpm = (len(self.typed_text) / elapsed_time) * 60
-        corrected_text = ' '.join([word for word, correct in zip(self.user_words_history, self.phrase_list_history) if word == correct])
+        corrected_text = ' '.join(
+            [word for word, correct in zip(self.user_words_history, self.phrase_list_history) if word == correct])
         corrected_cpm = (len(corrected_text) / elapsed_time) * 60
         wpm = corrected_cpm / 5
 
         cpm_var.set(f"{raw_cpm:.2f}")
         wpm_var.set(f"{wpm:.2f}")
-
 
     def phrase_generator(self):
         self.phrase = ""
@@ -174,7 +176,6 @@ class TypingSpeedApp:
                 self.update_metrics()
         else:
             user_entry.delete(0, 'end')
-
 
     def show_last_word(self, event):
         if user_entry.get() == " ":
@@ -254,6 +255,13 @@ class TypingSpeedApp:
                     file.truncate(0)
                     json.dump(last_score, file)
 
+                text_widget.config(state=NORMAL)
+                text_widget.delete("1.0", END)
+                text_widget.place(anchor="center", relx=.65, rely=.58)
+                text_widget.insert(END, f"Time's up! Your best score was: "
+                                        f"\n\nWPM: {last_wpm}  \n\nCPM: {last_cpm}")
+                text_widget.config(state=DISABLED)
+
         except FileNotFoundError:
             with open('scoreboard.json', 'a') as file:
                 max_value_cpm = cpm_var.get()
@@ -269,5 +277,3 @@ if __name__ == "__main__":
     download_dictionary()
     app = TypingSpeedApp(root, canvas)
     root.mainloop()
-
-# TODO 10: Scoreboard and plot (graph?) after typing
