@@ -31,5 +31,6 @@ This Python application measures the typing speed of a user through a graphical 
 - <b>PyCharm</b>
 
 <h2>Program walk-through:</h2>
+<b>YOUTUBE:</b>
 
 [![https://img.youtube.com/vi/qMHFlqAbqAk/0.jpg](https://img.youtube.com/vi/qMHFlqAbqAk/0.jpg)](https://www.youtube.com/watch?v=qMHFlqAbqAk)
